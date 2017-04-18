@@ -1,0 +1,134 @@
+private void createStep(
+      MPAState mpaState, MPAOConstants.Step step, MPAOConstants.StepStatus stepStatus, MPAOConstants.StepReason stepReason)
+      throws ServiceException
+  {
+    addStep(mpaState, step, stepStatus, stepReason, MPAOConstants.ObjectType.Cust, mpaState.getCurrentApplicantId());
+  }
+
+
+
+
+    try
+    {
+      // Use AddReplace, since in most instances it is appropriate to replace an
+      // existing step.
+      MPAOMappingHelper.addReplaceStep(mpaState, step, stepStatus, stepReason, objType, objSeqNum);
+    }
+    catch (FactoryException e1)
+    {
+      throw new ServiceException(MPAOConstants.INSTANTIATION_FAILURE, ErrorCode.INSTANTIATION_FAILED, e1);
+    }
+
+  
+
+
+    TmpBussProcessInfoType tbpi = mpaState.getState().getTmpBussProcessInfo();
+    if (tbpi == null)
+    {
+      tbpi = (TmpBussProcessInfoType) Factory.getInstanceByClass(TmpBussProcessInfoType.class);
+    }
+
+    TmpStatusInfoType tsi = tbpi.getTmpStatusInfo();
+    if (tsi == null)
+    {
+      tsi = (TmpStatusInfoType) Factory.getInstanceByClass(TmpStatusInfoType.class);
+    }
+
+    StepType newStep = buildStep(mpaState, step, stepStatus, stepReason, objType, objSeqNum);
+
+    boolean stepFound = false;
+    for (int i = 0; i < tsi.getStep().size(); i++)
+    {
+
+      StepType tempStep = (StepType) tsi.getStep().get(i);
+      if (tempStep.getStepTypeElem().equals(newStep.getStepTypeElem())
+          && tempStep.getObjType().equals(newStep.getObjType())
+          && tempStep.getObjSeqNum() == newStep.getObjSeqNum())
+      {
+        // replace the old step (but keep the old seqNum)
+        newStep.setSeqNum(tempStep.getSeqNum());
+        tsi.getStep().set(i, newStep);
+        stepFound = true;
+        break;
+      }
+
+    }
+    if (!stepFound)
+    {
+      tsi.getStep().add(newStep);
+    }
+
+    tbpi.setTmpStatusInfo(tsi);
+    mpaState.getState().setTmpBussProcessInfo(tbpi);
+
+  
+
+
+ StepType currentApplicantStep = MPAOMappingHelper.getStep(
+            mpaState,
+            Step.CustProfileProcess,
+            MPAOConstants.ObjectType.Cust,
+            applicant.getAddPartyInfo().getSeqNum());
+
+
+public static StepType getStep(
+      final MPAState mpaState, final MPAOConstants.Step step, final MPAOConstants.ObjectType objType, final long objSeqNum)
+  {
+    return getStep(mpaState.getState(), step, objType, objSeqNum);
+  }
+
+
+
+
+
+    final TmpBussProcessInfoType tbpi = sbpi.getTmpBussProcessInfo();
+    if (tbpi != null)
+    {
+      if (tbpi.getTmpStatusInfo() != null)
+      {
+        final List steps = tbpi.getTmpStatusInfo().getStep();
+        if (step != null)
+        {
+          final Iterator iter = steps.iterator();
+          while (iter.hasNext())
+          {
+            final StepType thisStep = (StepType) iter.next();
+            if (thisStep.getObjType() != null
+                && thisStep.getObjType().equals(objType.name())
+                && thisStep.getObjSeqNum() == objSeqNum
+                && thisStep.getStepTypeElem() != null
+                && thisStep.getStepTypeElem().equals(step.name()))
+            {
+              return thisStep;
+            }
+          }
+        }
+      }
+    }
+
+    return null;
+
+  
+
+
+
+import com.satya.MPAOMapping;
+import com.satya.PreparedDataForMPAO;
+
+
+public class Test {
+
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		MPAOMapping mapping = new MPAOMapping();
+		PreparedDataForMPAO mpao = new PreparedDataForMPAO();
+		mapping.getData(mpao);
+
+	}
+
+}
+
+
